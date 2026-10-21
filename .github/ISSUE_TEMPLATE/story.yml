@@ -1,0 +1,25 @@
+name: User story
+description: Новая функциональность с точки зрения пользователя
+labels: [story]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: История
+      value: |
+        Как <роль>, я хочу <действие>, чтобы <ценность>.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии приёмки
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Дополнительно
+      description: Макеты, ссылки на требования, ограничения

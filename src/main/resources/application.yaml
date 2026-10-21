@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: rebalance
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/rebalance}
+    username: ${DB_USER:rebalance}
+    password: ${DB_PASSWORD:rebalance}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

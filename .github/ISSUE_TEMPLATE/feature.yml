@@ -1,0 +1,18 @@
+name: Функциональность
+description: Что-то, что нужно реализовать
+labels: [feature]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Описание задачи
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемый результат
+    validations:
+      required: true
