@@ -1,6 +1,9 @@
 spring:
   application:
     name: rebalance
+  main:
+    banner-mode: off
+    log-startup-info: false
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/rebalance}
     username: ${DB_USER:rebalance}
@@ -16,5 +19,10 @@ management:
       exposure:
         include: health,info
 
-springdoc:
-  show-actuator: true
+logging:
+  level:
+    root: WARN
+    com.rebalance: INFO
+    org.springframework.boot.tomcat.TomcatWebServer: INFO
+  pattern:
+    console: "%d{HH:mm:ss,UTC} %-5level %logger{24} - %msg%n"
