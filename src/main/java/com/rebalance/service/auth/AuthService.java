@@ -1,4 +1,4 @@
-package com.rebalance.auth;
+package com.rebalance.service.auth;
 
 import com.rebalance.dto.request.LoginRequest;
 import com.rebalance.dto.request.RegisterRequest;
