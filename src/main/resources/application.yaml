@@ -25,4 +25,4 @@ logging:
     com.rebalance: INFO
     org.springframework.boot.tomcat.TomcatWebServer: INFO
   pattern:
-    console: "%d{HH:mm:ss} %-5level %logger{24} - %msg%n"
+    console: "%d{HH:mm:ss,UTC} %-5level %logger{24} - %msg%n"
