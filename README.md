@@ -24,6 +24,10 @@ docker compose up -d
 
 Проверка: http://localhost:8080/actuator/health
 
+Документация API и тестирование запросов: http://localhost:8080/swagger-ui/index.html.
+OpenAPI-схема доступна по адресу http://localhost:8080/v3/api-docs.
+Swagger UI показывает эндпоинты приложения и доступные Actuator-эндпоинты.
+
 Параметры подключения к базе задаются переменными окружения `DB_URL`, `DB_USER`, `DB_PASSWORD`. По умолчанию используется база из `compose.yaml`.
 
 ## Команды
