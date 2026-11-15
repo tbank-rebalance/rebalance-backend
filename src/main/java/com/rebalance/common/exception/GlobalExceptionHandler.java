@@ -22,9 +22,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ResponseStatusException.class)
 	public ResponseEntity<ProblemDetail> handleResponseStatusException(
 			ResponseStatusException e, HttpServletRequest request) {
-		int statusCode = e.getStatusCode().value();
-		HttpStatus status = HttpStatus.valueOf(statusCode);
-
+		HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
 		ErrorCode errorCode = ErrorCode.fromStatus(status);
 		String code = errorCode.code;
 		String title = errorCode.title;
@@ -38,14 +36,14 @@ public class GlobalExceptionHandler {
 		problemDetail.setProperty("code", code);
 		problemDetail.setProperty("timestamp", OffsetDateTime.now());
 
-		if (statusCode == 400 || statusCode == 422) {
+		if (errorCode == ErrorCode.BUSINESS_ERROR || errorCode == ErrorCode.UNPROCESSABLE_CONTENT) {
 			problemDetail.setProperty("errors", List.of());
 		}
 
 		ResponseEntity.BodyBuilder response =
 				ResponseEntity.status(status).contentType(MediaType.APPLICATION_PROBLEM_JSON);
 
-		if (statusCode == 503) {
+		if (errorCode == ErrorCode.SERVICE_UNAVAILABLE) {
 			response.header(HttpHeaders.RETRY_AFTER, "30");
 		}
 		return response.body(problemDetail);
