@@ -24,6 +24,12 @@ docker compose up -d
 
 Проверка: http://localhost:8080/actuator/health
 
+Для диагностики состояния БД, диска и других проверок запустите приложение с профилем `dev`:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./mvnw -q spring-boot:run
+```
+
 По умолчанию в консоли остаются предупреждения, ошибки и сообщения Tomcat с фактическим портом сервера. Для подробных логов и стандартного баннера Spring Boot:
 
 ```bash
