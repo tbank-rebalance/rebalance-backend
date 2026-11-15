@@ -65,7 +65,7 @@ public class AuthErrorHandler {
 					new ArrayList<>(fieldErrors.values()));
 		}
 		return problem(
-				HttpStatus.UNPROCESSABLE_ENTITY,
+				HttpStatus.UNPROCESSABLE_CONTENT,
 				"validation-failed",
 				"Некорректные данные",
 				"Проверьте поля с ошибками",
