@@ -1,0 +1,8 @@
+spring:
+  main:
+    banner-mode: console
+    log-startup-info: true
+
+logging:
+  level:
+    root: INFO
