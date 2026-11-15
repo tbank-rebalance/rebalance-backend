@@ -5,7 +5,7 @@ import com.rebalance.dto.request.RegisterRequest;
 import com.rebalance.dto.response.LoginResponse;
 import com.rebalance.dto.response.RegisterResponse;
 
-/** Граница между HTTP-контроллером и бизнес-логикой авторизации. */
+/** Интерфейс между HTTP-контроллером и бизнес-логикой авторизации. */
 public interface AuthService {
 
 	/** Создаёт пользователя и возвращает его публичные данные. */
