@@ -6,6 +6,7 @@ import com.rebalance.dto.response.LoginResponse;
 import com.rebalance.dto.response.RegisterResponse;
 import com.rebalance.entity.user.User;
 import com.rebalance.repository.user.UserRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,7 +55,10 @@ public class AuthService {
 			User saved = users.saveAndFlush(user);
 			return new RegisterResponse(saved.getId(), saved.getEmail(), saved.getFirstName(), saved.getLastName());
 		} catch (DataIntegrityViolationException exception) {
-			throw emailAlreadyExists();
+			if (isEmailUniquenessViolation(exception)) {
+				throw emailAlreadyExists();
+			}
+			throw exception;
 		}
 	}
 
@@ -65,7 +69,7 @@ public class AuthService {
 	 * @return токен доступа с типом Bearer
 	 * @throws ResponseStatusException если учётные данные неверны; статус 401
 	 */
-	@Transactional
+	@Transactional(readOnly = true)
 	public LoginResponse login(LoginRequest request) {
 		var user = users.findByEmailIgnoreCase(request.email());
 		String hash = user.map(User::getPasswordHash).orElse(dummyPasswordHash);
@@ -82,5 +86,21 @@ public class AuthService {
 	 */
 	private static ResponseStatusException emailAlreadyExists() {
 		return new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь с таким email уже зарегистрирован");
+	}
+
+	/**
+	 * Проверяет, что ошибка БД относится именно к индексу уникальности email.
+	 *
+	 * @param exception ошибка сохранения пользователя
+	 * @return {@code true} при нарушении уникальности email
+	 */
+	private static boolean isEmailUniquenessViolation(DataIntegrityViolationException exception) {
+		for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+			if (cause instanceof ConstraintViolationException violation
+					&& "idx_user_email_lower".equals(violation.getConstraintName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
