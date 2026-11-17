@@ -19,21 +19,23 @@ Maven ставить не нужно, в репозитории есть Maven W
 
 ```bash
 docker compose up -d
-./mvnw -q spring-boot:run
+SPRING_PROFILES_ACTIVE=dev ./mvnw -q spring-boot:run
 ```
 
 Проверка: http://localhost:8080/actuator/health
 
-Для диагностики состояния БД, диска и других проверок запустите приложение с профилем `dev`:
+Профиль `dev` показывает детали health-проверок и разрешает временный ключ JWT. После перезапуска приложения ранее выданные токены перестанут действовать. Для запуска без профиля `dev` задайте постоянный ключ:
 
 ```bash
-SPRING_PROFILES_ACTIVE=dev ./mvnw -q spring-boot:run
+AUTH_JWT_SECRET="$(openssl rand -base64 32)" ./mvnw -q spring-boot:run
 ```
+
+Для постоянства токенов между перезапусками сохраните созданное значение `AUTH_JWT_SECRET` в секретах окружения и используйте его при каждом запуске.
 
 По умолчанию в консоли остаются предупреждения, ошибки и сообщения Tomcat с фактическим портом сервера. Для подробных логов и стандартного баннера Spring Boot:
 
 ```bash
-SPRING_PROFILES_ACTIVE=verbose ./mvnw spring-boot:run
+AUTH_JWT_SECRET="<постоянный Base64-ключ>" SPRING_PROFILES_ACTIVE=verbose ./mvnw spring-boot:run
 ```
 
 Параметры подключения к базе задаются переменными окружения `DB_URL`, `DB_USER`, `DB_PASSWORD`. По умолчанию используется база из `compose.yaml`.

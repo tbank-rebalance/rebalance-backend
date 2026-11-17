@@ -27,8 +27,12 @@ public class JwtTokenService {
 	 * @param encoder кодировщик, подписывающий JWT
 	 * @param clock часы для времени выдачи и окончания действия
 	 * @param lifetime срок действия токена; по умолчанию один час
+	 * @throws IllegalArgumentException если срок действия не положителен
 	 */
 	public JwtTokenService(JwtEncoder encoder, Clock clock, @Value("${auth.jwt.lifetime:PT1H}") Duration lifetime) {
+		if (lifetime.isZero() || lifetime.isNegative()) {
+			throw new IllegalArgumentException("AUTH_JWT_LIFETIME должен быть положительным");
+		}
 		this.encoder = encoder;
 		this.clock = clock;
 		this.lifetime = lifetime;

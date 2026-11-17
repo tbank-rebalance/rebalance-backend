@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import tools.jackson.databind.ObjectMapper;
 /** Сквозные проверки регистрации, входа и доступа по токену. */
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Import({TestcontainersConfiguration.class, AuthFlowTests.ProtectedController.class})
 class AuthFlowTests {
 
@@ -72,6 +74,7 @@ class AuthFlowTests {
 
 		User saved = users.findByEmailIgnoreCase("ivan@example.com").orElseThrow();
 		assertThat(saved.getPasswordHash()).isNotEqualTo("secret123");
+		assertThat(saved.getPasswordHash()).startsWith("{pbkdf2@SpringSecurity_v5_8}");
 		assertThat(passwords.matches("secret123", saved.getPasswordHash())).isTrue();
 
 		mvc.perform(post("/auth/register")

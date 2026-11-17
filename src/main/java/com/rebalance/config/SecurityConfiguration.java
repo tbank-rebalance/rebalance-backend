@@ -4,6 +4,7 @@ import jakarta.servlet.DispatcherType;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Base64;
+import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -42,30 +44,37 @@ public class SecurityConfiguration {
 	}
 
 	/**
-	 * Создаёт PBKDF2-хешер для сохранения и проверки паролей пользователей.
+	 * Создаёт PBKDF2-хешер с идентификатором версии алгоритма в сохранённом хеше.
 	 *
 	 * @return хешер паролей
 	 */
 	@Bean
 	PasswordEncoder passwordEncoder() {
-		return Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+		String id = "pbkdf2@SpringSecurity_v5_8";
+		return new DelegatingPasswordEncoder(id, Map.of(id, Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8()));
 	}
 
 	/**
-	 * Создаёт ключ подписи JWT из Base64-настройки. При отсутствии настройки генерирует временный ключ,
-	 * поэтому ранее выданные токены перестанут действовать после перезапуска приложения.
+	 * Создаёт ключ подписи JWT из Base64-настройки. Временный ключ разрешён только при явной
+	 * настройке для локальной разработки.
 	 *
 	 * @param encodedSecret ключ в Base64 или пустая строка
+	 * @param allowEphemeralSecret разрешает временный ключ при отсутствии постоянного
 	 * @return ключ для алгоритма HS256
-	 * @throws IllegalArgumentException если настройка не является Base64 или ключ короче 32 байт
+	 * @throws IllegalArgumentException если ключ отсутствует, имеет неверный формат или короче 32 байт
 	 */
 	@Bean
-	SecretKey jwtSecret(@Value("${auth.jwt.secret:}") String encodedSecret) {
+	SecretKey jwtSecret(
+			@Value("${auth.jwt.secret:}") String encodedSecret,
+			@Value("${auth.jwt.allow-ephemeral-secret:false}") boolean allowEphemeralSecret) {
 		byte[] secret;
 		if (encodedSecret.isBlank()) {
+			if (!allowEphemeralSecret) {
+				throw new IllegalArgumentException("AUTH_JWT_SECRET обязателен для запуска приложения");
+			}
 			secret = new byte[32];
 			new SecureRandom().nextBytes(secret);
-			LOGGER.warn("AUTH_JWT_SECRET не задан");
+			LOGGER.warn("AUTH_JWT_SECRET не задан: временный ключ сменится после перезапуска");
 		} else {
 			try {
 				secret = Base64.getDecoder().decode(encodedSecret);
