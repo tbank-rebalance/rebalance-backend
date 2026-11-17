@@ -1,6 +1,9 @@
 spring:
   application:
     name: rebalance
+  mvc:
+    problemdetails:
+      enabled: true
   main:
     banner-mode: off
     log-startup-info: false

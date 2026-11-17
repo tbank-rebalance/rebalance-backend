@@ -146,6 +146,10 @@ class AuthFlowTests {
 				.andReturn();
 		assertThat(unknown.getResponse().getContentAsString())
 				.isEqualTo(wrong.getResponse().getContentAsString());
+		assertThat(json.readTree(unknown.getResponse().getContentAsString())
+						.get("detail")
+						.asText())
+				.isEqualTo("Неверный email или пароль");
 	}
 
 	/**
