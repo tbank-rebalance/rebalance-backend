@@ -44,9 +44,8 @@ public class AuthController {
 						@Content(
 								mediaType = "application/json",
 								schema = @Schema(implementation = RegisterResponse.class))),
-		@ApiResponse(responseCode = "400", description = "Не заполнены обязательные поля или некорректный JSON"),
-		@ApiResponse(responseCode = "409", description = "Email уже зарегистрирован"),
-		@ApiResponse(responseCode = "422", description = "Нарушены правила валидации")
+		@ApiResponse(responseCode = "400", description = "Некорректный JSON или нарушение правил валидации"),
+		@ApiResponse(responseCode = "409", description = "Email уже зарегистрирован")
 	})
 	public RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
 		return authService.register(request);
@@ -63,9 +62,8 @@ public class AuthController {
 						@Content(
 								mediaType = "application/json",
 								schema = @Schema(implementation = LoginResponse.class))),
-		@ApiResponse(responseCode = "400", description = "Не заполнены обязательные поля или некорректный JSON"),
-		@ApiResponse(responseCode = "401", description = "Неверный email или пароль"),
-		@ApiResponse(responseCode = "422", description = "Нарушены правила валидации")
+		@ApiResponse(responseCode = "400", description = "Некорректный JSON или нарушение правил валидации"),
+		@ApiResponse(responseCode = "401", description = "Неверный email или пароль")
 	})
 	public LoginResponse login(@Valid @RequestBody LoginRequest request) {
 		return authService.login(request);
