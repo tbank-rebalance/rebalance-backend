@@ -13,13 +13,15 @@ import com.rebalance.dto.response.RegisterResponse;
 import com.rebalance.service.auth.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** Проверки HTTP-контракта регистрации и входа. TODO(tolstovrob): без реализации бизнес-логики. */
+/** Проверки HTTP-контракта регистрации и входа. */
 @WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTests {
 
 	@Autowired
@@ -28,6 +30,7 @@ class AuthControllerTests {
 	@MockitoBean
 	private AuthService authService;
 
+	/** Проверяет статусы и тела успешных ответов регистрации и входа. */
 	@Test
 	void returnsCreatedUserAndAccessToken() throws Exception {
 		when(authService.register(any(RegisterRequest.class)))
@@ -49,11 +52,23 @@ class AuthControllerTests {
 				.andExpect(jsonPath("$.accessToken").value("test-token"));
 	}
 
+	/** Проверяет отказ в регистрации при незаполненных обязательных полях. */
 	@Test
 	void rejectsRequestWithMissingRequiredFields() throws Exception {
 		mvc.perform(post("/auth/register")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"email\":\"ivan@example.com\",\"password\":\"secret123\",\"firstName\":\" \"}"))
+				.andExpect(status().isBadRequest());
+	}
+
+	/** Проверяет HTTP 400 при нарушении правил валидации заполненного поля. */
+	@Test
+	void rejectsInvalidFieldWithBadRequest() throws Exception {
+		mvc.perform(post("/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+							{"email":"ivan@example.com","password":"short1","firstName":"Иван","lastName":"Иванов"}
+							"""))
 				.andExpect(status().isBadRequest());
 	}
 }
