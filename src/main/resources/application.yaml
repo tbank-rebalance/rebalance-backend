@@ -15,6 +15,12 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  mvc:
+    problemdetails:
+      enabled: false
+  web:
+    resources:
+      add-mappings: false
 
 management:
   endpoints:
