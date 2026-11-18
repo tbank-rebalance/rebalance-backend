@@ -60,4 +60,15 @@ class AuthControllerTests {
 						.content("{\"email\":\"ivan@example.com\",\"password\":\"secret123\",\"firstName\":\" \"}"))
 				.andExpect(status().isBadRequest());
 	}
+
+	/** Проверяет HTTP 400 при нарушении правил валидации заполненного поля. */
+	@Test
+	void rejectsInvalidFieldWithBadRequest() throws Exception {
+		mvc.perform(post("/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+							{"email":"ivan@example.com","password":"short1","firstName":"Иван","lastName":"Иванов"}
+							"""))
+				.andExpect(status().isBadRequest());
+	}
 }
