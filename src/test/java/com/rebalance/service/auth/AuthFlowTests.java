@@ -104,7 +104,7 @@ class AuthFlowTests {
 				.andReturn();
 		String token = json.readTree(login.getResponse().getContentAsString())
 				.get("accessToken")
-				.asText();
+				.stringValue();
 		assertThat(token).isNotBlank();
 		assertThat(decoder.decode(token).getSubject())
 				.isEqualTo(users.findByEmailIgnoreCase("ivan@example.com")
@@ -151,7 +151,7 @@ class AuthFlowTests {
 				.isEqualTo(wrong.getResponse().getContentAsString());
 		assertThat(json.readTree(unknown.getResponse().getContentAsString())
 						.get("detail")
-						.asText())
+						.stringValue())
 				.isEqualTo("Неверный email или пароль");
 	}
 
