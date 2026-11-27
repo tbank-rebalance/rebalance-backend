@@ -1,13 +1,16 @@
 spring:
   application:
     name: rebalance
+  mvc:
+    problemdetails:
+      enabled: true
   main:
     banner-mode: off
     log-startup-info: false
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/rebalance}
     username: ${DB_USER:rebalance}
-    password: ${DB_PASSWORD:rebalance}
+    password: ${DB_PASSWORD}
   jpa:
     open-in-view: false
     hibernate:

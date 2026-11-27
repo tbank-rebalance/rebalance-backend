@@ -1,0 +1,54 @@
+package com.rebalance.config;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.Base64;
+import org.junit.jupiter.api.Test;
+
+/** Проверяет настройку ключа подписи JWT. */
+class SecurityConfigurationTests {
+
+	private final SecurityConfiguration configuration = new SecurityConfiguration();
+
+	/** Проверяет принятие ключа минимальной допустимой длины. */
+	@Test
+	void acceptsBase64KeyWithAtLeastThirtyTwoBytes() {
+		byte[] key = new byte[32];
+		String encoded = Base64.getEncoder().encodeToString(key);
+
+		assertThat(configuration.jwtSecret(encoded, false).getEncoded()).containsExactly(key);
+	}
+
+	/** Проверяет понятную ошибку без раскрытия неверного значения ключа. */
+	@Test
+	void explainsInvalidBase64WithoutExposingItsValue() {
+		assertThatThrownBy(() -> configuration.jwtSecret("invalid-secret!", false))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("AUTH_JWT_SECRET должен быть строкой в формате Base64");
+	}
+
+	/** Проверяет отказ при ключе короче 32 байт. */
+	@Test
+	void rejectsShortKey() {
+		String encoded = Base64.getEncoder().encodeToString(new byte[31]);
+
+		assertThatThrownBy(() -> configuration.jwtSecret(encoded, false))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("не менее 32 байт");
+	}
+
+	/** Проверяет обязательность постоянного ключа без разрешения временного. */
+	@Test
+	void requiresSecretOutsideLocalDevelopment() {
+		assertThatThrownBy(() -> configuration.jwtSecret("", false))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("AUTH_JWT_SECRET обязателен для запуска приложения");
+	}
+
+	/** Проверяет создание временного ключа при явном разрешении. */
+	@Test
+	void allowsEphemeralSecretForLocalDevelopment() {
+		assertThat(configuration.jwtSecret("", true).getEncoded()).hasSize(32);
+	}
+}
