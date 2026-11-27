@@ -1,35 +1,63 @@
 package com.rebalance.common.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+/** Единая обработка ошибок REST API */
 @RestControllerAdvice
-public class GlobalExceptionHandler {
-	// Обработка исключений 404, 409 и тд
-	@ExceptionHandler(ResponseStatusException.class)
-	public ProblemDetail handleResponseStatusException(ResponseStatusException e) {
-		return e.getBody();
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
+		return createProblemDetail(
+				HttpStatus.UNAUTHORIZED,
+				"Ошибка авторизации",
+				"Неверные учетные данные или отсутствует действительная авторизация");
 	}
 
-	// Обработка исключений валидации (400)
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ProblemDetail handleValidationException(MethodArgumentNotValidException e) {
-		ProblemDetail problemDetail =
-				ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Проверьте правильность заполнения полей");
-		problemDetail.setTitle("Некорректные данные");
-		return problemDetail;
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
+		return createProblemDetail(HttpStatus.NOT_FOUND, "Объект не найден", ex.getMessage());
 	}
 
-	// Обработка всех остальных ошибок (500)
+	@ExceptionHandler(ConflictException.class)
+	public ProblemDetail handleConflictException(ConflictException ex) {
+		return createProblemDetail(HttpStatus.CONFLICT, "Конфликт данных", ex.getMessage());
+	}
+
+	@ExceptionHandler(ExternalServiceUnavailableException.class)
+	public ProblemDetail handleExternalServiceUnavailableException(ExternalServiceUnavailableException ex) {
+
+		LOGGER.warn("Внешний сервис временно недоступен", ex);
+
+		return createProblemDetail(
+				HttpStatus.SERVICE_UNAVAILABLE,
+				"Сервис временно недоступен",
+				"Не удалось выполнить запрос к внешнему сервису. Повторите попытку позже");
+	}
+
 	@ExceptionHandler(Exception.class)
-	public ProblemDetail handleGlobalException(Exception e) {
-		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-				HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось обработать запрос. Повторите попытку позже");
-		problemDetail.setTitle("Внутренняя ошибка сервера");
+	public ProblemDetail handleUnexpectedException(Exception ex) {
+		LOGGER.error("Непредвиденная ошибка при обработке запроса", ex);
+
+		return createProblemDetail(
+				HttpStatus.INTERNAL_SERVER_ERROR,
+				"Внутренняя ошибка сервера",
+				"Не удалось обработать запрос. Повторите попытку позже");
+	}
+
+	private ProblemDetail createProblemDetail(HttpStatus status, String title, String detail) {
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+
+		problemDetail.setTitle(title);
+
 		return problemDetail;
 	}
 }
